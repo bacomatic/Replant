@@ -11,16 +11,11 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 
 @Mod(modid="RePlant", name="RePlant", version="0.0.1")
-@NetworkMod(clientSideRequired=true, serverSideRequired=true)
+@NetworkMod(clientSideRequired=false, serverSideRequired=true)
 public class RePlant {
 	// instance that Forge uses
 	@Instance("RePlant")
 	public static RePlant instance;
-	
-	// where client/server Proxy code is loaded
-	@SidedProxy(clientSide="com.shadedreality.minecraft.replant.client.ClientProxy",
-			    serverSide="com.shadedreality.minecraft.replant.CommonProxy")
-	public static CommonProxy proxy;
 	
 	private static final EntityListener entityListener = new EntityListener();
 	
@@ -30,7 +25,6 @@ public class RePlant {
 	
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		proxy.registerRenderers();
 		MinecraftForge.EVENT_BUS.register(entityListener);
 	}
 	
