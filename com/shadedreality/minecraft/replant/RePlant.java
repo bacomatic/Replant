@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Shaded Reality
+ * Copyright (c) 2013, 2014, Shaded Reality
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,17 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkMod;
 
 @Mod(modid="RePlant", name="RePlant", version="0.0.1")
-@NetworkMod(clientSideRequired=false, serverSideRequired=true)
 public class RePlant {
 	// instance that Forge uses
 	@Instance("RePlant")
 	public static RePlant instance;
 	
+    @SidedProxy(clientSide="com.shadedreality.minecraft.replant.RePlant$NullProxy",
+                serverSide="com.shadedreality.minecraft.replant.RePlant$NullProxy")
+    public static NullProxy proxy;
+    
 	private static final EntityListener entityListener = new EntityListener();
 	
 	@EventHandler
@@ -57,5 +59,11 @@ public class RePlant {
 	
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
+	}
+
+	public static class NullProxy {
+	    public void registerRenderers() {
+	        // not needed
+	    }
 	}
 }
