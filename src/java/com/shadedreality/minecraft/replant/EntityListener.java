@@ -73,13 +73,6 @@ public class EntityListener {
     public EntityListener() {
     }
 
-// Uncomment only for debugging!!
-    @SubscribeEvent
-    public void itemTossEvent(ItemTossEvent event) {
-        // reduce item lifetime for debugging...
-        event.entityItem.lifespan = 100;
-    }
-
     @SubscribeEvent
     public void itemExpireEvent(ItemExpireEvent event) {
         Entity entity = event.entity;

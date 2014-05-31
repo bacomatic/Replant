@@ -28,6 +28,8 @@
 package com.shadedreality.minecraft.replant;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -35,26 +37,46 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid="RePlant", name="RePlant", version="0.1")
-public class RePlant {
+@Mod(modid="mod_Replant", name="Replant", version="0.1")
+public class Replant {
 	// instance that Forge uses
-	@Instance("RePlant")
-	public static RePlant instance;
+	@Instance("Replant")
+	public static Replant instance;
 	
-    @SidedProxy(clientSide="com.shadedreality.minecraft.replant.RePlant$NullProxy",
-                serverSide="com.shadedreality.minecraft.replant.RePlant$NullProxy")
+    @SidedProxy(clientSide="com.shadedreality.minecraft.replant.Replant$NullProxy",
+                serverSide="com.shadedreality.minecraft.replant.Replant$NullProxy")
     public static NullProxy proxy;
     
 	private static final EntityListener entityListener = new EntityListener();
+	private static ItemTossListener tossListener = null; // don't allocate unless needed
+	
+	// Keep these package private
+	// TBD: Move this to a config class instead
+	static boolean enableItemLifespanTweak = false;
+	static int tossedItemLifespan = 100;
 	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
+	    Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+	    config.load();
+	    
+	    // Load configuration
+	    enableItemLifespanTweak = config.get("debugging", "tweakTossedItemLifespan", enableItemLifespanTweak).getBoolean(false);
+	    tossedItemLifespan = config.get("debugging", "tossedItemLifespan", tossedItemLifespan).getInt(100);
+	    
+	    config.save();
 	}
 	
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		MinecraftForge.EVENT_BUS.register(entityListener);
+		
+		if (enableItemLifespanTweak) {
+		    tossListener = new ItemTossListener();
+		    MinecraftForge.EVENT_BUS.register(tossListener);
+		}
 	}
 	
 	@EventHandler
@@ -64,6 +86,15 @@ public class RePlant {
 	public static class NullProxy {
 	    public void registerRenderers() {
 	        // not needed
+	    }
+	}
+	
+	public static class ItemTossListener {
+	    @SubscribeEvent
+	    public void itemTossedEvent(ItemTossEvent event) {
+	        if (enableItemLifespanTweak && event.entityItem != null) {
+	            event.entityItem.lifespan = tossedItemLifespan;
+	        }
 	    }
 	}
 }
