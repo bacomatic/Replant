@@ -29,6 +29,10 @@ package com.shadedreality.minecraft.replant;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCactus;
+import net.minecraft.block.BlockLilyPad;
+import net.minecraft.block.BlockMelon;
+import net.minecraft.block.BlockPumpkin;
 import net.minecraft.block.BlockReed;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -41,134 +45,146 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 
 public class EntityListener {
     private static class EntityRegistrar {
+        // Cached Block types, to avoid hammering the block and item registries
         // These are initialized lazily, the VM won't run the static initializer
         // until this inner class is accessed, so as long as we only call it in
         // the event handler then all these block types should already be registered
-        public static final Block waterlily;
         public static final Block waterMoving;
         public static final Block waterStill;
-        public static final Block melon;
-        public static final Block pumpkin;
-        public static final Block cactus;
         public static final BlockReed reeds;
-        
+
         public static final ItemSeeds melonSeeds;
         public static final ItemSeeds pumpkinSeeds;
         
         static {
-            waterlily = Block.getBlockFromName("waterlily");
             waterMoving = Block.getBlockFromName("flowing_water");
             waterStill = Block.getBlockFromName("water");
-            melon = Block.getBlockFromName("melon");
-            pumpkin = Block.getBlockFromName("pumpkin");
-            cactus = Block.getBlockFromName("cactus");
-            reeds = (BlockReed)Block.getBlockFromName("reeds");
-            
-            melonSeeds = (ItemSeeds)Item.itemRegistry.getObject("melon_seeds");
-            pumpkinSeeds = (ItemSeeds)Item.itemRegistry.getObject("pumpkin_seeds");
+            reeds = (BlockReed) Block.getBlockFromName("reeds");
+
+            melonSeeds = (ItemSeeds) Item.itemRegistry.getObject("melon_seeds");
+            pumpkinSeeds = (ItemSeeds) Item.itemRegistry.getObject("pumpkin_seeds");
         }
     }
-    
-	public EntityListener() {
-	}
 
-	@SubscribeEvent
-	public void itemDeathEvent(ItemExpireEvent event) {
-		Entity entity = event.entity;
-		if (entity instanceof EntityItem) {
-			EntityItem ei = (EntityItem)entity;
-			ItemStack items = ei.getEntityItem();
-			
-			World world = ei.worldObj;
-			int posX = (int)Math.floor(ei.posX);
-			int posY = (int)Math.floor(ei.posY);
-			int posZ = (int)Math.floor(ei.posZ);
-			
-			Item item = items.getItem();
-			int metadata = item.getMetadata(items.getItemDamage());
-			
-			if (IPlantable.class.isAssignableFrom(item.getClass())) {
-				// seeds, carrot, potato
-				IPlantable plantable = (IPlantable)item;
-				
-				posY--;  // get block immediately below item
-				
-				Block soil = world.getBlock(posX, posY, posZ);
-				// attempt to plant it, duplicating code in ItemSeeds
-	            if (soil != null 
-	            		&& soil.canSustainPlant(world, posX, posY, posZ, ForgeDirection.UP, plantable)
-	            		&& world.isAirBlock(posX, posY + 1, posZ)) {
-	                world.setBlock(posX, posY + 1, posZ, plantable.getPlant(world, posX, posY, posZ));
-	                --items.stackSize; // decrement in case something else cancels destruction
-	            }
-			} else if (ItemBlock.class.isAssignableFrom(item.getClass())) {
-				ItemBlock itemBlock = (ItemBlock)item;
-				Block block = itemBlock.field_150939_a; // ugh...
-				
-				if (IPlantable.class.isAssignableFrom(block.getClass())) {
-					// lily is plantable, but we need to "float" it to the surface first since items sink in water
-					if (block == EntityRegistrar.waterlily) {
-						int waterTop = posY;
-						Block worldBlock; 
-						do {
-							waterTop++;
-							worldBlock = world.getBlock(posX, waterTop, posZ);
-						} while (worldBlock == EntityRegistrar.waterMoving
-							  || worldBlock == EntityRegistrar.waterStill);
-						
-						if (world.isAirBlock(posX, waterTop, posZ)) {
-							posY = waterTop;
-						} else {
-							// cancel, can't grow here
-							return;
-						}
-					}
-					
-					if (block.canPlaceBlockAt(world, posX, posY, posZ)) {
-						// need metadata so the correct trees appear
-						world.setBlock(posX, posY, posZ, ((IPlantable)block).getPlant(world, posX, posY, posZ), metadata, 3);
-		                --items.stackSize; // decrement in case something else cancels destruction
-					}
-				} else {
-					// check for melon, pumpkin, cactus
-					if (block == EntityRegistrar.melon
-				     || block == EntityRegistrar.pumpkin) {
-						// get the seed type and plant the seed if we can
-						Item seed;
-						if (block == EntityRegistrar.melon) {
-							seed = EntityRegistrar.melonSeeds;
-						} else {
-							seed = EntityRegistrar.pumpkinSeeds;
-						}
-						
-						IPlantable plantable = (IPlantable)seed;
-						
-						posY--;  // get block immediately below item
-						
-						Block soil = world.getBlock(posX, posY, posZ);
-			            
-						// attempt to plant it, duplicating code in ItemSeeds
-			            if (soil != null 
-			            		&& soil.canSustainPlant(world, posX, posY, posZ, ForgeDirection.UP, plantable)
-			            		&& world.isAirBlock(posX, posY + 1, posZ)) {
-			                world.setBlock(posX, posY + 1, posZ, plantable.getPlant(world, posX, posY, posZ));
-			                --items.stackSize; // decrement in case something else cancels destruction
-			            }
-					} else if (block == EntityRegistrar.cactus) {
-						if (block.canPlaceBlockAt(world, posX, posY, posZ)) {
-							world.setBlock(posX, posY, posZ, block, metadata, 3);
-						}
-					}
-				}
-			} else if (item instanceof ItemReed) {
-				// Sugarcane
-				if (EntityRegistrar.reeds.canPlaceBlockAt(world, posX, posY, posZ)) {
-					world.setBlock(posX, posY, posZ, EntityRegistrar.reeds, metadata, 3);
-				}
-			} // else ignore
-		}
-	}
+    public EntityListener() {
+    }
+
+// Uncomment only for debugging!!
+    @SubscribeEvent
+    public void itemTossEvent(ItemTossEvent event) {
+        // reduce item lifetime for debugging...
+        event.entityItem.lifespan = 100;
+    }
+
+    @SubscribeEvent
+    public void itemExpireEvent(ItemExpireEvent event) {
+        Entity entity = event.entity;
+        if (entity instanceof EntityItem) {
+            EntityItem ei = (EntityItem) entity;
+            ItemStack items = ei.getEntityItem();
+
+            World world = ei.worldObj;
+            int posX = (int) Math.floor(ei.posX);
+            int posY = (int) Math.floor(ei.posY);
+            int posZ = (int) Math.floor(ei.posZ);
+
+            Item item = items.getItem();
+            Class<?> itemClass = item.getClass();
+            int metadata = item.getMetadata(items.getItemDamage());
+
+            if (IPlantable.class.isAssignableFrom(itemClass)) {
+                // seeds, carrot, potato
+                IPlantable plantable = (IPlantable) item;
+
+                posY--; // get block immediately below item
+
+                Block soil = world.getBlock(posX, posY, posZ);
+                // attempt to plant it, duplicating code in ItemSeeds
+                if (soil != null
+                        && soil.canSustainPlant(world, posX, posY, posZ, ForgeDirection.UP, plantable)
+                        && world.isAirBlock(posX, posY + 1, posZ)) {
+                    world.setBlock(posX, posY + 1, posZ, plantable.getPlant(world, posX, posY, posZ));
+                    --items.stackSize; // decrement in case something else
+                                       // cancels destruction
+                }
+            } else if (ItemBlock.class.isAssignableFrom(itemClass)) {
+                ItemBlock itemBlock = (ItemBlock) item;
+                Block block = itemBlock.field_150939_a; // ugh...
+                Class<?> blockClass = block.getClass();
+
+                if (IPlantable.class.isAssignableFrom(blockClass)) {
+                    // lily is plantable, but we need to "float" it to the
+                    // surface first since items sink in water
+                    if (BlockLilyPad.class.isAssignableFrom(blockClass)) {
+                        int waterTop = posY;
+                        Block worldBlock;
+                        do {
+                            waterTop++;
+                            worldBlock = world.getBlock(posX, waterTop, posZ);
+                        } while (Block.isEqualTo(worldBlock, EntityRegistrar.waterMoving)
+                              || Block.isEqualTo(worldBlock, EntityRegistrar.waterStill));
+
+                        if (world.isAirBlock(posX, waterTop, posZ)) {
+                            posY = waterTop;
+                        } else {
+                            // cancel, can't grow here
+                            return;
+                        }
+                    }
+
+                    if (block.canPlaceBlockAt(world, posX, posY, posZ)) {
+                        // need metadata so the correct trees appear
+                        world.setBlock(posX, posY, posZ, ((IPlantable) block)
+                                .getPlant(world, posX, posY, posZ), metadata, 3);
+                        --items.stackSize; // decrement in case something else cancels destruction
+                    }
+                } else {
+                    // check for melon, pumpkin, cactus
+                    // They are neither plantable nor seeds, so we have to handle
+                    // them specially
+                    if (BlockPumpkin.class.isAssignableFrom(blockClass)
+                            || BlockMelon.class.isAssignableFrom(blockClass)) {
+                        // get the seed type and plant the seed if we can
+                        Item seed;
+                        if (BlockMelon.class.isAssignableFrom(blockClass)) {
+                            seed = EntityRegistrar.melonSeeds;
+                        } else {
+                            seed = EntityRegistrar.pumpkinSeeds;
+                        }
+                        
+                        // Bummer, we can't just use ItemSeed.onItemUse or we'll get an NPE
+                        // since we don't have a player
+                        IPlantable plantable = (IPlantable) seed;
+                        posY--; // get block immediately below item
+                        Block soil = world.getBlock(posX, posY, posZ);
+
+                        // attempt to plant it, duplicating code in ItemSeeds
+                        // TBD: Could we just use ItemSeeds?
+                        if (soil != null
+                                && soil.canSustainPlant(world, posX, posY, posZ, ForgeDirection.UP, plantable)
+                                && world.isAirBlock(posX, posY + 1, posZ)) {
+                            world.setBlock(posX, posY + 1, posZ, plantable.getPlant(world, posX, posY, posZ));
+                            --items.stackSize; // decrement in case something
+                                               // else cancels destruction
+                        }
+                    } else if (BlockCactus.class.isAssignableFrom(blockClass)) {
+                        if (block.canPlaceBlockAt(world, posX, posY, posZ)) {
+                            world.setBlock(posX, posY, posZ, block, metadata, 3);
+                        }
+                    }
+                }
+            } else if (ItemReed.class.isAssignableFrom(itemClass)) {
+                // Sugarcane
+                // ItemReed's block field is private, so we have to ask
+                // BlockReed directly
+                if (EntityRegistrar.reeds.canPlaceBlockAt(world, posX, posY, posZ)) {
+                    world.setBlock(posX, posY, posZ, EntityRegistrar.reeds, metadata, 3);
+                }
+            } // else ignore
+        }
+    }
 }
