@@ -1,0 +1,15 @@
+[{
+    "modid": "mod_RePlant",
+    "name": "RePlant",
+    "description": "Re-plants plantable items such as saplings, seeds, and certain plant blocks like melons, pumpkins and cactus.",
+    "version": "0.0.1 (beta)",
+    "credits": "A Shaded Reality Production",
+    "logoFile": "",
+    "mcversion": "",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [ "Bacomatic" ],
+    "parent":"",
+    "screenshots": [],
+    "dependencies": ["mod_MinecraftForge"]
+}]
