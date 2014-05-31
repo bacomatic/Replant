@@ -27,9 +27,9 @@
 
 package com.shadedreality.minecraft.replant;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCactus;
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockLilyPad;
 import net.minecraft.block.BlockMelon;
 import net.minecraft.block.BlockPumpkin;
@@ -45,7 +45,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class EntityListener {
     private static class EntityRegistrar {
@@ -129,10 +129,17 @@ public class EntityListener {
                         }
                     }
 
-                    if (block.canPlaceBlockAt(world, posX, posY, posZ)) {
+                    // Handle double plants here or we'll just end up planting the bottom part of the plant
+                    if (BlockDoublePlant.class.isAssignableFrom(blockClass)) {
+                        BlockDoublePlant bdp = (BlockDoublePlant)block;
+                        // FIXME: calling an obfuscated function
+                        bdp.func_149889_c(world, posX, posY, posZ, metadata, 3);
+                        --items.stackSize;
+                    } else if (block.canPlaceBlockAt(world, posX, posY, posZ)) {
                         // need metadata so the correct trees appear
-                        world.setBlock(posX, posY, posZ, ((IPlantable) block)
-                                .getPlant(world, posX, posY, posZ), metadata, 3);
+                        world.setBlock(posX, posY, posZ,
+                                ((IPlantable) block).getPlant(world, posX, posY, posZ),
+                                metadata, 3);
                         --items.stackSize; // decrement in case something else cancels destruction
                     }
                 } else {
