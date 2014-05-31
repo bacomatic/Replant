@@ -3,21 +3,13 @@ Replant
 
 Simple plant replanting mod for Minecraft
 
-Works with 1.7.2, Forge 10.12.1.1060.
 
-All this mod does is listen for when plantable items are about to expire in the
-world. When they do, rather than being destroyed they are planted in the ground.
-This takes some of the headache out of replanting trees when harvesting wood.
-Instead of breaking the leaves trying to get saplings, just let them fall to the
-ground, five minutes later they will automatically be planted.
+This mod listens for when plantable items or blocks are about to expire in the world. When they do, rather than being destroyed they are planted in the ground if they can be. This fairly simple mechanic doesn't have a whole lot of use, but this can take some of the headache out of replanting trees when harvesting wood. Instead of breaking the leaves trying to get saplings, just let them fall to the ground, five minutes later they will automatically be planted. No need to collect saplings and manually replant the forest!
 
-All vanilla plants are supported, including double height plants like rose bushes.
-All rules for planting are preserved, IOW crops must be planted on farmland,
-netherwart must be on soulsand, etc.
+All vanilla plants are supported, including double height plants like rose bushes. All rules for planting are preserved, IOW crops must be planted on farmland, netherwart must be on soul sand, etc.
 
-Special behaviors:
-- Pumpkins and melons will be planted as well as their seeds, so they will not be
-placed as blocks but as stems, as real pumpkins and melons would do.
+Non-vanilla-y behaviors:
+- Pumpkins and melons will be planted as well as their seeds, so they will not be placed as blocks but as stems, as real pumpkins and melons would do.
 - Water lillies will be floated to the surface prior to planting.
 
 
@@ -28,7 +20,7 @@ Requires:
 
 
 Known Issues:
-- None yet
+- Apples aren't planted (what tree would they turn into?)
 
 
 Installation:
@@ -36,27 +28,24 @@ Installation:
 
 
 Configuration:
-At the moment this mod has one configuration option for debugging. The config
-file is saved as config/mod_Replant.cfg.
+At the moment this mod has one configuration option for debugging. The config file is saved as config/mod_Replant.cfg. It is recommended to launch Minecraft with the mod installed once, then edit the config file rather than trying to hand craft it.
 
 The following settings are available:
-debugging:
-boolean tweakTossedItemLifespan - if set to true then items that are tossed by
-                                  the player will have their lifespan altered so
-                                  they can expire quicker. Not recommended for
-                                  production use.
 
-int tossedItemLifespan - a number representing the number of ticks tossed items
-                         will float around in the world. The default in Minecraft
-                         is 6000, or about five minutes.
+debugging category:
+| type | name | description |
+|:------|:------|:-------------|
+| boolean | tweakTossedItemLifespan | if set to true then items that are tossed by the player will have their lifespan altered so they can expire quicker. Not recommended for production use. |
+| int | tossedItemLifespan | a number representing the number of ticks tossed items will float around in the world. The default in Minecraft is 6000, or about five minutes. |
 
 
+A note to other mod developers:
+This mod will plant anything that implements the IPlantable interface. If you have added plants/seeds/blocks that can be planted using that interface then this should be able to plant them. I cannot guarantee that any special behaviors will be preserved, especially if the plant wants information about the player when it's planted.
 
 
-This mod come with no warranty, expressed or implied.
+This software come with absolutely no warranty, expressed or implied.
 
 Copyright (c) 2013, 2014, Shaded Reality. All Rights Reserved.
 Redistribution rights granted under the terms of the license agreement.
 
-Source code is provided free of charge and royalty-free under the 3 clause BSD
-license. See Replant.java for the full license text.
+Source code is provided free of charge and royalty-free under the 3 clause BSD license. See Replant.java for the full license text.
