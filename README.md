@@ -12,18 +12,19 @@ All vanilla plants are supported, including double height plants like rose bushe
 
 Non-vanilla-y behaviors:
 
-* Pumpkins and melons will be planted as well as their seeds. They will not be placed as blocks as when placing by hand but as stems when planting the seeds.
+* Pumpkins and melons will be planted as their seeds, this means they will be planted as stems instead of being placed as blocks.
 * Water lillies will float to the surface prior to planting. If there isn't at least one block of air immediately above the water, then it will not be planted.
 
 
 #### Requires:
-- Minecraft 7.2
+- Minecraft 1.7.2
 - Forge 10.12.1.1060 or later
 - Java 7 or later (Java 6 is dead people, move on!)
 
 
 #### Known Issues:
 - Apples aren't planted (what tree would they turn into?)
+- Melon slices aren't planted either
 
 
 #### Installation:
@@ -31,14 +32,14 @@ Non-vanilla-y behaviors:
 
 
 #### Configuration:
-At the moment this mod has one configuration option for debugging. The config file is saved as config/mod_Replant.cfg. It is recommended to launch Minecraft with the mod installed once, then edit the config file rather than trying to hand craft it.
-
-The following settings are available:
+The following config file settings are available:
 
 | category | type  | name  | description  |
 |:------|:------|:------|:-------------|
 | debugging | boolean | tweakTossedItemLifespan | if set to true then items that are tossed by the player will have their lifespan altered, generally so they can expire quicker.|
 | debugging | int   | tossedItemLifespan | a number representing the number of ticks tossed items will float around in the world.|
+
+The config file is created as config/mod_Replant.cfg once you have run Minecraft with the mod installed.
 
 
 #### A note to other mod developers:
