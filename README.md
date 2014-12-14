@@ -17,9 +17,8 @@ Non-vanilla-y behaviors:
 
 
 #### Requires:
-- Minecraft 1.7.2
-- Forge 10.12.1.1060 or later
-- Java 7 or later (Java 6 is dead people, move on!)
+- Minecraft 1.8 (this branch is still under development)
+- Forge 11 or later
 
 
 #### Known Issues:
@@ -32,14 +31,14 @@ Non-vanilla-y behaviors:
 
 
 #### Configuration:
-The following config file settings are available:
+The following game rules are available:
 
 | category | type  | name  | description  |
 |:------|:------|:------|:-------------|
-| debugging | boolean | tweakTossedItemLifespan | if set to true then items that are tossed by the player will have their lifespan altered, generally so they can expire quicker.|
-| debugging | int   | tossedItemLifespan | a number representing the number of ticks tossed items will float around in the world.|
+| debugging | boolean | replantTweakTossedItemLifespan | if set to true then items that are tossed by the player will have their lifespan altered, generally so they can expire quicker.|
+| debugging | int   | replantTossedItemLifespan | a number representing the number of ticks tossed items will float around in the world.|
 
-The config file is created as config/mod_Replant.cfg once you have run Minecraft with the mod installed.
+There are no configuration file settings, only game rules are used.
 
 
 #### A note to other mod developers:
